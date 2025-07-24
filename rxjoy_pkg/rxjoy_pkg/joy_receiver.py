@@ -1,5 +1,4 @@
-
-### Receiver
+# Receiver
 import json, zmq, rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
@@ -7,26 +6,27 @@ from geometry_msgs.msg import Twist
 
 class JoyNode(Node):
     def __init__(self):
+        topic = "/joy_teleop/cmd_vel" # CHANGE THIS IF YOU WANT TO MODIFY HUSKY CODE FOR SOMETHING ELSE
+        
         super().__init__("joy_bridge")
         ctx = zmq.Context()
         self.sub= ctx.socket(zmq.SUB)
         self.sub.connect("tcp://localhost:5555")
         self.sub.setsockopt_string(zmq.SUBSCRIBE, "")
-        self.pub= self.create_publisher(Twist, "/joy_teleop/cmd_vel", 10)
+        
+        self.pub= self.create_publisher(Twist, topic, 10)
         self.create_timer(0.001, self.tick)
 
         self.seq = 0
 
     def tick(self):
         try:
-            tw = Twist()
             msg = self.sub.recv_json(flags=zmq.NOBLOCK)
+            speed = msg["buttons"][5]/2 + 0.5 # 0.5 if not pressed, 1 otherwise
             
-            speed = 0.5
-            if msg["buttons"][5]: speed = 1.0
-
-            tw.linear.x = msg["axes"][1] * speed
-            tw.angular.z = msg["axes"][3]
+            tw = Twist()
+            tw.linear.x = -msg["axes"][1] * speed
+            tw.angular.z = -msg["axes"][3] * speed
 
             self.pub.publish(tw)
 
