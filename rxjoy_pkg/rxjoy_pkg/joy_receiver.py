@@ -10,7 +10,7 @@ class JoyNode(Node):
         super().__init__("joy_bridge")
         ctx = zmq.Context()
         self.sub= ctx.socket(zmq.SUB)
-        self.sub.connect("tcp://localhost:5556")
+        self.sub.connect("tcp://localhost:5555")
         self.sub.setsockopt_string(zmq.SUBSCRIBE, "")
         self.pub= self.create_publisher(Twist, "/joy_teleop/cmd_vel", 10)
         self.create_timer(0.001, self.tick)
