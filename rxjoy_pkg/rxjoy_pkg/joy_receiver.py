@@ -22,7 +22,7 @@ class JoyNode(Node):
     def tick(self):
         try:
             msg = self.sub.recv_json(flags=zmq.NOBLOCK)
-            speed = msg["buttons"][5]/2 + 0.5 # 0.5 if not pressed, 1 otherwise
+            speed = (not msg["buttons"][5])/2 + 0.5 # 0.5 if not pressed, 1 otherwise
             
             tw = Twist()
             tw.linear.x = -msg["axes"][1] * speed
